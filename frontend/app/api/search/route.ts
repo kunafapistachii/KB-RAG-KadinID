@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 import { embedQuery } from '@/lib/embedding';
-import { rerankChunks } from '@/lib/rerank';
+import { rerankChunks, type RerankDebug } from '@/lib/rerank';
 
 export const runtime = 'nodejs';
 
@@ -16,6 +16,7 @@ interface SearchBody {
   doc_type?: string;
   pasal_number?: string;
   doc_id?: string;
+  debug?: boolean;
 }
 
 export async function POST(req: NextRequest) {
@@ -90,10 +91,11 @@ export async function POST(req: NextRequest) {
       source_file: r.source_file,
       similarity: Number(r.similarity),
     }));
+    const debug: RerankDebug | undefined = body.debug ? ({} as RerankDebug) : undefined;
     const data = process.env.DEEPSEEK_API_KEY
-      ? await rerankChunks(query, candidates, k)
+      ? await rerankChunks(query, candidates, k, debug)
       : candidates.slice(0, k);
-    return NextResponse.json({ data, meta: { query, k } });
+    return NextResponse.json({ data, meta: { query, k, debug } });
   } catch (err) {
     return NextResponse.json(
       { error: { message: `Database query failed: ${(err as Error).message}` } },

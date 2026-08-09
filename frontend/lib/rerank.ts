@@ -17,11 +17,20 @@ function getClient(): OpenAI {
  * returns something unparseable — a rerank outage should degrade to
  * baseline behavior, not break search. Measured on the eval harness:
  * MRR .712 -> .950 at candidate pool 20, 1.000 at pool 50. */
+export interface RerankDebug {
+  hadApiKey: boolean;
+  error?: string;
+  rawContent?: string;
+  indicesParsed?: number[];
+}
+
 export async function rerankChunks(
   query: string,
   candidates: SearchResult[],
-  k: number
+  k: number,
+  debug?: RerankDebug
 ): Promise<SearchResult[]> {
+  if (debug) debug.hadApiKey = !!process.env.DEEPSEEK_API_KEY;
   if (candidates.length === 0) return [];
 
   const listing = candidates
@@ -43,16 +52,18 @@ export async function rerankChunks(
       temperature: 0,
     });
     const content = resp.choices[0].message.content || '{}';
+    if (debug) debug.rawContent = content.slice(0, 500);
     const parsed = JSON.parse(content) as { relevant?: unknown };
     const indices = Array.isArray(parsed.relevant)
       ? parsed.relevant.filter(
           (i): i is number => typeof i === 'number' && i >= 0 && i < candidates.length
         )
       : [];
+    if (debug) debug.indicesParsed = indices;
     if (indices.length === 0) return candidates.slice(0, k);
     return indices.slice(0, k).map((i) => candidates[i]);
   } catch (err) {
-    console.error('rerankChunks failed, falling back to vector order:', err);
+    if (debug) debug.error = (err as Error).message;
     return candidates.slice(0, k);
   }
 }
