@@ -2,6 +2,12 @@ import { Pool } from 'pg';
 
 let pool: Pool | null = null;
 
+function withNoVerifySsl(connectionString: string): string {
+  const url = new URL(connectionString);
+  url.searchParams.set('sslmode', 'no-verify');
+  return url.toString();
+}
+
 export function getPool(): Pool {
   if (!pool) {
     // POSTGRES_URL (Vercel/Supabase integration) points at the Supavisor
@@ -9,8 +15,11 @@ export function getPool(): Pool {
     // and unreachable from Vercel's serverless runtime.
     pool = process.env.POSTGRES_URL
       ? new Pool({
-          connectionString: process.env.POSTGRES_URL,
-          ssl: { rejectUnauthorized: false },
+          // pg-connection-string derives its ssl config from the URL's
+          // sslmode and ignores a separate `ssl` option when connectionString
+          // is set; Supabase's default sslmode=require ends up strict
+          // (rejectUnauthorized=true) and rejects their cert as self-signed.
+          connectionString: withNoVerifySsl(process.env.POSTGRES_URL),
           max: 5,
         })
       : new Pool({
