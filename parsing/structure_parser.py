@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 from extraction.pdf_extractor import PageText
 
-BAB_RE = re.compile(r"^BAB\s+([IVXLCDM]+)\b\s*(.*)$", re.IGNORECASE)
+BAB_RE = re.compile(r"^BAB\s+([IVXLCDM]+[A-Z]?)\b\s*(.*)$", re.IGNORECASE)
 PASAL_RE = re.compile(r"^Pasal\s+(\d+[A-Za-z]?)\s*$", re.IGNORECASE)
 AYAT_RE = re.compile(r"^\((\d+[a-zA-Z]?)\)\s*(.*)$")
 HURUF_RE = re.compile(r"^([a-z])\.\s+(.*)$")
