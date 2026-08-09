@@ -14,6 +14,7 @@ class SearchResult:
     full_citation: str
     bab_number: str | None
     pasal_number: str | None
+    pasal_title: str | None
     ayat_number: str | None
     text: str
     page_start: int
@@ -60,7 +61,7 @@ def search_chunks(
 
     sql = f"""
         SELECT id, doc_id, doc_type, doc_title, full_citation,
-               bab_number, pasal_number, ayat_number, text,
+               bab_number, pasal_number, pasal_title, ayat_number, text,
                page_start, page_end, source_file,
                1 - (embedding <=> %s::vector) AS similarity
         FROM chunks
@@ -77,9 +78,10 @@ def search_chunks(
     return [
         SearchResult(
             chunk_id=r[0], doc_id=r[1], doc_type=r[2], doc_title=r[3],
-            full_citation=r[4], bab_number=r[5], pasal_number=r[6], ayat_number=r[7],
-            text=r[8], page_start=r[9], page_end=r[10], source_file=r[11],
-            similarity=float(r[12]),
+            full_citation=r[4], bab_number=r[5], pasal_number=r[6], pasal_title=r[7],
+            ayat_number=r[8],
+            text=r[9], page_start=r[10], page_end=r[11], source_file=r[12],
+            similarity=float(r[13]),
         )
         for r in rows
     ]

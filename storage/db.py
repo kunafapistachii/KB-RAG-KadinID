@@ -51,7 +51,7 @@ def insert_chunks(conn, document_id: int, chunks: list[Chunk], embeddings: list[
     rows = [
         (
             document_id, c.doc_id, c.doc_type, c.doc_title, c.doc_year,
-            c.bab_number, c.bab_title, c.pasal_number, c.ayat_number,
+            c.bab_number, c.bab_title, c.pasal_number, c.pasal_title, c.ayat_number,
             c.text, c.full_citation, c.page_start, c.page_end,
             c.source_file, c.needs_manual_review,
             "[" + ",".join(str(x) for x in emb) + "]",
@@ -63,7 +63,7 @@ def insert_chunks(conn, document_id: int, chunks: list[Chunk], embeddings: list[
             cur,
             """INSERT INTO chunks (
                    document_id, doc_id, doc_type, doc_title, doc_year,
-                   bab_number, bab_title, pasal_number, ayat_number,
+                   bab_number, bab_title, pasal_number, pasal_title, ayat_number,
                    text, full_citation, page_start, page_end,
                    source_file, needs_manual_review, embedding
                ) VALUES %s""",

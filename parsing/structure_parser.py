@@ -30,6 +30,7 @@ class AyatNode:
 @dataclass
 class PasalNode:
     pasal_number: str
+    pasal_title: str | None = None
     text: str = ""
     ayat_list: list[AyatNode] = field(default_factory=list)
     page_start: int = 0
@@ -199,6 +200,21 @@ def parse_structure(pages: list[PageText]) -> ParseResult:
             current_bab.page_end = page_num
             assigned_chars += len(line)
             i += 1
+            # title sits on the next non-empty line, before any ayat/huruf
+            if i < n:
+                next_page, next_raw = lines[i]
+                next_line = next_raw.strip()
+                if (
+                    next_line
+                    and len(next_line) <= MAX_TITLE_LOOKAHEAD_CHARS
+                    and not BAB_RE.match(next_line)
+                    and not PASAL_RE.match(next_line)
+                    and not AYAT_RE.match(next_line)
+                    and not HURUF_RE.match(next_line)
+                ):
+                    current_pasal.pasal_title = next_line
+                    assigned_chars += len(next_line)
+                    i += 1
             continue
 
         if ayat_match and current_pasal is not None:

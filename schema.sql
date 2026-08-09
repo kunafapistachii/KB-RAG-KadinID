@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     bab_number      TEXT,
     bab_title       TEXT,
     pasal_number    TEXT,
+    pasal_title     TEXT,
     ayat_number     TEXT,
     text            TEXT NOT NULL,
     full_citation   TEXT NOT NULL,

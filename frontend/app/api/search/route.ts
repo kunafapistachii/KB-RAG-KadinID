@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   const sql = `
     SELECT id, doc_id, doc_type, doc_title, full_citation,
-           bab_number, pasal_number, ayat_number, text,
+           bab_number, pasal_number, pasal_title, ayat_number, text,
            page_start, page_end, source_file,
            1 - (embedding <=> $1::vector) AS similarity
     FROM chunks
@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
       full_citation: r.full_citation,
       bab_number: r.bab_number,
       pasal_number: r.pasal_number,
+      pasal_title: r.pasal_title,
       ayat_number: r.ayat_number,
       text: r.text,
       page_start: r.page_start,

@@ -17,7 +17,13 @@ def extract_pages(pdf_path: str) -> list[PageText]:
     pages = []
     try:
         for i, page in enumerate(doc):
-            text = page.get_text("text")
+            # sort=True reorders text spans top-to-bottom/left-to-right by
+            # position instead of PDF content-stream order — without it,
+            # pages with a header/logo box overlapping the body text (as in
+            # AD.pdf's presidential-decree letterhead) get scrambled: whole
+            # paragraphs land in the wrong place, silently corrupting the
+            # parsed Pasal/Ayat structure downstream.
+            text = page.get_text("text", sort=True)
             pages.append(PageText(page_number=i + 1, text=text))
     finally:
         doc.close()

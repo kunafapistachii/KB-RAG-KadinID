@@ -6,6 +6,7 @@ export interface SearchResult {
   full_citation: string;
   bab_number: string | null;
   pasal_number: string | null;
+  pasal_title: string | null;
   ayat_number: string | null;
   text: string;
   page_start: number;

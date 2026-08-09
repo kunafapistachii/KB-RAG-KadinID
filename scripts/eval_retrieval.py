@@ -21,6 +21,12 @@ from storage.retrieval import search_chunks
 DOC_ID = "ad_2026"
 
 # (query, expected_pasal_number, expected_ayat_number_or_None)
+# Pasal 22 ayat 7-16 and Pasal 42's split reflect a one-off data correction
+# applied directly to ad_2026 in the DB: the source PDF omits the "(7)"
+# marker before "Pembentukan badan-badan..." in Pasal 22 (a likely gazette
+# typo), and Pasal 2/3/4/15/16/39/42/43 each had a duplicate or unsplit
+# chunk from a chunker bug. Fixed against AD_KADIN_KEPPRES_18_2022.md,
+# verified against page images.
 TEST_CASES = [
     ("berapa lama masa jabatan pengurus Kadin?", "36", "1"),
     ("apa syarat kuorum Musyawarah Nasional supaya sah?", "17", "10"),
@@ -30,11 +36,11 @@ TEST_CASES = [
     ("berapa syarat sah kuorum Musyawarah Provinsi?", "25", "10"),
     ("apa itu Musyawarah Nasional Luar Biasa atau Munaslub?", "18", "1"),
     ("dari mana saja sumber dana organisasi Kadin?", "39", "1"),
-    ("bagaimana cara membubarkan organisasi Kadin?", "42", None),
+    ("bagaimana cara membubarkan organisasi Kadin?", "42", "1"),
     ("apa saja hak anggota biasa Kadin?", "33", "1"),
     ("berapa kali Ketua Umum Kadin bisa dipilih kembali?", "36", "2"),
     ("apa fungsi Sekretariat Kadin Indonesia?", "24", "1"),
-    ("siapa yang mengesahkan Dewan Pengurus Kadin Provinsi hasil Muprov?", "22", "7"),
+    ("siapa yang mengesahkan Dewan Pengurus Kadin Provinsi hasil Muprov?", "22", "8"),
     ("apa syarat menjadi Direktur Eksekutif Kadin?", "24", "4"),
     ("berapa kali setahun Rapimnas diadakan?", "23", "2"),
     ("apa wewenang Musyawarah Nasional?", "17", "8"),

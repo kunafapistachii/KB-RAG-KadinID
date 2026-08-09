@@ -35,6 +35,7 @@ class Chunk:
     bab_number: str | None
     bab_title: str | None
     pasal_number: str | None
+    pasal_title: str | None
     ayat_number: str | None
     text: str
     full_citation: str
@@ -45,12 +46,13 @@ class Chunk:
 
 
 def _build_citation(doc_title: str, doc_year: int | None, bab: BabNode | None,
-                     pasal_number: str | None, ayat_number: str | None) -> str:
+                     pasal_number: str | None, pasal_title: str | None,
+                     ayat_number: str | None) -> str:
     parts = [doc_title if not doc_year else f"{doc_title} {doc_year}"]
     if bab is not None and bab.bab_number:
         parts.append(f"BAB {bab.bab_number}")
     if pasal_number:
-        parts.append(f"Pasal {pasal_number}")
+        parts.append(f"Pasal {pasal_number}" + (f" ({pasal_title})" if pasal_title else ""))
     if ayat_number:
         parts.append(f"Ayat ({ayat_number})")
     return ", ".join([parts[0]] + parts[1:]) if len(parts) > 1 else parts[0]
@@ -76,9 +78,10 @@ def build_chunks(
                     chunks.append(Chunk(
                         doc_id=doc_id, doc_type=doc_type, doc_title=doc_title, doc_year=doc_year,
                         bab_number=bab.bab_number, bab_title=bab.bab_title or None,
-                        pasal_number=pasal.pasal_number, ayat_number=ayat.ayat_number,
+                        pasal_number=pasal.pasal_number, pasal_title=pasal.pasal_title,
+                        ayat_number=ayat.ayat_number,
                         text=ayat.text,
-                        full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, ayat.ayat_number),
+                        full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, pasal.pasal_title, ayat.ayat_number),
                         page_start=ayat.page_start, page_end=ayat.page_end,
                         source_file=source_file,
                         needs_manual_review=len(ayat.text) > MAX_CHUNK_CHARS or _looks_corrupted(ayat.text),
@@ -88,9 +91,10 @@ def build_chunks(
                     chunks.append(Chunk(
                         doc_id=doc_id, doc_type=doc_type, doc_title=doc_title, doc_year=doc_year,
                         bab_number=bab.bab_number, bab_title=bab.bab_title or None,
-                        pasal_number=pasal.pasal_number, ayat_number=None,
+                        pasal_number=pasal.pasal_number, pasal_title=pasal.pasal_title,
+                        ayat_number=None,
                         text=pasal.text.strip(),
-                        full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, None),
+                        full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, pasal.pasal_title, None),
                         page_start=pasal.page_start, page_end=pasal.page_end,
                         source_file=source_file,
                         needs_manual_review=_looks_corrupted(pasal.text),
@@ -101,9 +105,10 @@ def build_chunks(
                 chunks.append(Chunk(
                     doc_id=doc_id, doc_type=doc_type, doc_title=doc_title, doc_year=doc_year,
                     bab_number=bab.bab_number, bab_title=bab.bab_title or None,
-                    pasal_number=pasal.pasal_number, ayat_number=None,
+                    pasal_number=pasal.pasal_number, pasal_title=pasal.pasal_title,
+                    ayat_number=None,
                     text=pasal.text.strip(),
-                    full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, None),
+                    full_citation=_build_citation(doc_title, doc_year, bab, pasal.pasal_number, pasal.pasal_title, None),
                     page_start=pasal.page_start, page_end=pasal.page_end,
                     source_file=source_file,
                     needs_manual_review=len(pasal.text) > MAX_CHUNK_CHARS or _looks_corrupted(pasal.text),
@@ -114,7 +119,7 @@ def build_chunks(
             continue
         chunks.append(Chunk(
             doc_id=doc_id, doc_type=doc_type, doc_title=doc_title, doc_year=doc_year,
-            bab_number=None, bab_title=None, pasal_number=None, ayat_number=None,
+            bab_number=None, bab_title=None, pasal_number=None, pasal_title=None, ayat_number=None,
             text=orphan.text,
             full_citation=f"{doc_title} {doc_year or ''} (uncategorized)".strip(),
             page_start=orphan.page_start, page_end=orphan.page_end,
