@@ -31,3 +31,19 @@ export async function fetchDocuments(): Promise<{ data: DocumentSummary[] }> {
   if (!res.ok) throw new Error(`Failed to load documents (${res.status})`);
   return res.json();
 }
+
+export async function fetchPasal(params: {
+  docId: string;
+  pasalNumber: string;
+}): Promise<SearchResponse> {
+  const res = await fetch(`/api/pasal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ doc_id: params.docId, pasal_number: params.pasalNumber }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error?.message || `Lookup failed (${res.status})`);
+  }
+  return res.json();
+}
