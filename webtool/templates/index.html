@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AD-ART KB — Review Queue</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; color: #1a1a1a; }
+    h1 { font-size: 1.3rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ddd; }
+    a.btn { display: inline-block; padding: 4px 10px; background: #2563eb; color: white;
+            text-decoration: none; border-radius: 4px; font-size: 0.85rem; }
+    a.btn.disabled { background: #9ca3af; pointer-events: none; }
+    .flagged { color: #b91c1c; font-weight: 600; }
+    .clean { color: #15803d; }
+  </style>
+</head>
+<body>
+  <h1>Document Review Queue</h1>
+  <table>
+    <tr><th>doc_id</th><th>Title</th><th>Flagged</th><th>Total</th><th></th></tr>
+    {% for doc_id, title, flagged, total in docs %}
+    <tr>
+      <td>{{ doc_id }}</td>
+      <td>{{ title }}</td>
+      <td class="{{ 'flagged' if flagged > 0 else 'clean' }}">{{ flagged }}</td>
+      <td>{{ total }}</td>
+      <td>
+        {% if flagged > 0 %}
+          <a class="btn" href="/review/{{ doc_id }}">Review</a>
+        {% else %}
+          <a class="btn disabled" href="#">All clear</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
