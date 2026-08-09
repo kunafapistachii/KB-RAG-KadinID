@@ -91,10 +91,9 @@ export async function POST(req: NextRequest) {
       source_file: r.source_file,
       similarity: Number(r.similarity),
     }));
-    const debug: RerankDebug | undefined = body.debug ? ({} as RerankDebug) : undefined;
-    const data = process.env.DEEPSEEK_API_KEY
-      ? await rerankChunks(query, candidates, k, debug)
-      : candidates.slice(0, k);
+    const hasKey = !!process.env.DEEPSEEK_API_KEY;
+    const debug: RerankDebug | undefined = body.debug ? ({ hadApiKey: hasKey } as RerankDebug) : undefined;
+    const data = hasKey ? await rerankChunks(query, candidates, k, debug) : candidates.slice(0, k);
     return NextResponse.json({ data, meta: { query, k, debug } });
   } catch (err) {
     return NextResponse.json(
