@@ -51,7 +51,8 @@ export async function rerankChunks(
       : [];
     if (indices.length === 0) return candidates.slice(0, k);
     return indices.slice(0, k).map((i) => candidates[i]);
-  } catch {
+  } catch (err) {
+    console.error('rerankChunks failed, falling back to vector order:', err);
     return candidates.slice(0, k);
   }
 }
