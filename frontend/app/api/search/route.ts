@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 import { embedQuery } from '@/lib/embedding';
+import { rerankChunks } from '@/lib/rerank';
 
 export const runtime = 'nodejs';
+
+// Widened vector pool the reranker chooses from before truncating to the
+// requested k. Verified against the 20-query eval harness: pool=20 missed
+// one query whose true match sat at vector rank 45; pool=50 hit 100%.
+const RERANK_CANDIDATE_POOL = 50;
 
 interface SearchBody {
   query?: string;
@@ -63,13 +69,13 @@ export async function POST(req: NextRequest) {
     FROM chunks
     WHERE ${where.join(' AND ')}
     ORDER BY embedding <=> $1::vector
-    LIMIT ${k}
+    LIMIT ${RERANK_CANDIDATE_POOL}
   `;
 
   const pool = getPool();
   try {
     const result = await pool.query(sql, [embStr, ...params]);
-    const data = result.rows.map((r) => ({
+    const candidates = result.rows.map((r) => ({
       chunk_id: r.id,
       doc_id: r.doc_id,
       doc_type: r.doc_type,
@@ -84,6 +90,9 @@ export async function POST(req: NextRequest) {
       source_file: r.source_file,
       similarity: Number(r.similarity),
     }));
+    const data = process.env.DEEPSEEK_API_KEY
+      ? await rerankChunks(query, candidates, k)
+      : candidates.slice(0, k);
     return NextResponse.json({ data, meta: { query, k } });
   } catch (err) {
     return NextResponse.json(
